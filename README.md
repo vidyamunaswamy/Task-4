@@ -1,74 +1,57 @@
 # Task-4
-import math
+import numpy as np
 
-def euclidean_distance(p1, p2):
-    """Calculate Euclidean distance between two points."""
-    return math.sqrt(sum((a - b) ** 2 for a, b in zip(p1, p2)))
+def linear_regression_normal_equation(X, y):
+    """
+    Computes linear regression coefficients using the Normal Equation.
 
+    Parameters:
+        X : list of lists
+            Feature matrix (include a column of 1's for the intercept).
+        y : list
+            Target values.
 
-def k_means(points, k, initial_centroids, max_iterations):
-    # Initialize centroids
-    centroids = [list(c) for c in initial_centroids]
+    Returns:
+        list
+            Regression coefficients rounded to 4 decimal places.
+    """
 
-    for _ in range(max_iterations):
+    # Convert inputs to NumPy arrays
+    X = np.array(X, dtype=float)
+    y = np.array(y, dtype=float)
 
-        # Step 1: Create empty clusters
-        clusters = [[] for _ in range(k)]
+    # Step 1: Compute the transpose of X
+    XT = X.T
 
-        # Step 2: Assign each point to the nearest centroid
-        for point in points:
-            distances = [euclidean_distance(point, centroid) for centroid in centroids]
-            nearest = distances.index(min(distances))
-            clusters[nearest].append(point)
+    # Step 2: Compute XᵀX
+    XTX = XT @ X
 
-        # Step 3: Compute new centroids
-        new_centroids = []
+    # Step 3: Compute the inverse of XᵀX
+    XTX_inv = np.linalg.inv(XTX)
 
-        for i in range(k):
-            if clusters[i]:
-                dimension = len(points[0])
+    # Step 4: Compute Xᵀy
+    XTy = XT @ y
 
-                centroid = []
-                for d in range(dimension):
-                    mean = sum(point[d] for point in clusters[i]) / len(clusters[i])
-                    centroid.append(mean)
+    # Step 5: Compute coefficients
+    # θ = (XᵀX)⁻¹ Xᵀy
+    theta = XTX_inv @ XTy
 
-                new_centroids.append(centroid)
-            else:
-                # Keep the old centroid if cluster is empty
-                new_centroids.append(centroids[i])
+    # Step 6: Round each coefficient to 4 decimal places
+    theta = [round(float(value), 4) for value in theta]
 
-        # Step 4: Check for convergence
-        if new_centroids == centroids:
-            break
-
-        centroids = new_centroids
-
-    # Round to 4 decimal places
-    result = []
-    for centroid in centroids:
-        result.append(tuple(round(x, 4) for x in centroid))
-
-    return result
+    return theta
 
 
-# Example
-points = [
-    (1, 2),
-    (1, 4),
-    (1, 0),
-    (10, 2),
-    (10, 4),
-    (10, 0)
+# ---------------- Example ----------------
+
+X = [
+    [1, 1],
+    [1, 2],
+    [1, 3]
 ]
 
-k = 2
+y = [1, 2, 3]
 
-initial_centroids = [
-    (1, 1),
-    (10, 1)
-]
+coefficients = linear_regression_normal_equation(X, y)
 
-max_iterations = 10
-
-print(k_means(points, k, initial_centroids, max_iterations))
+print("Regression Coefficients:", coefficients)
